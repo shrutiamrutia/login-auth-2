@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from "react-redux";
-import { Table, Button, Modal, Input, Form } from 'antd';
+import { Table, Button, Modal, Input, Form, message, Spin } from 'antd';
 import {
-    EditOutlined
+    EditOutlined,
 } from '@ant-design/icons';
 import AddProduct from "../AddProduct"
 import { fetchAllProduct, deleteProductData, editProduct } from '../../store/action';
@@ -15,7 +15,8 @@ const Product = () => {
     const [price, setPrice] = useState(0);
     const [category, setCategory] = useState('');
     const [description, setDescription] = useState('');
-
+    const [messageApi, contextHolder] = message.useMessage();
+    const [loading, setLoading] = useState(true)
 
     const list = useSelector(state => state.login.list);
     console.log('list: ', list);
@@ -49,6 +50,10 @@ const Product = () => {
         setDescription(record.description)
     };
     const handleOk = () => {
+        messageApi.open({
+            type: 'success',
+            content: 'Edited Product SuccessFully',
+        });
         setIsModalOpen(false);
         const body = {
             title: modalData.title,
@@ -63,7 +68,9 @@ const Product = () => {
         setIsModalOpen(false);
     };
     useEffect(() => {
+        setLoading(true)
         dispatch(fetchAllProduct())
+        setLoading(false)
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
     const columns = [
@@ -130,49 +137,55 @@ const Product = () => {
         },
     ];
 
-
     return (
         <>
-            <Modal title="Edit Product" open={isModalOpen} onOk={handleOk} onCancel={handleCancel}>
-                <Form.Item label="Title">
-                    <Input
-                        placeholder="input placeholder"
-                        defaultValue={modalData.title}
-                        type="text"
-                        onChange={handleChange}
-                        name="title" />
-                </Form.Item>
-                <Form.Item label="price">
-                    <Input
-                        defaultValue={modalData.price}
-                        type="number"
-                        name="price"
-                        placeholder="price"
-                        onChange={handleChange} />
-                </Form.Item>
-                <Form.Item label="category">
-                    <Input
-                        value={modalData.category}
-                        type="text"
-                        name="category"
-                        placeholder="category"
-                        onChange={handleChange} />
-                </Form.Item>
-                <Form.Item label="description">
-                    <Input
-                        value={modalData.description}
-                        type="text"
-                        name="description"
-                        placeholder="description"
-                        onChange={handleChange} />
-                </Form.Item>
-            </Modal>
-            <AddProduct />
-
-            {Array.isArray(list) ? (
+            {contextHolder}
+            {loading ? (
+                <Spin size="large" />
+            ) : (
+                <div>
+                    <Modal title="Edit Product" okText="Edit" open={isModalOpen} onOk={handleOk} onCancel={handleCancel}>
+                        <Form.Item label="Title">
+                            <Input
+                                placeholder="input placeholder"
+                                defaultValue={modalData.title}
+                                type="text"
+                                onChange={handleChange}
+                                name="title" />
+                        </Form.Item>
+                        <Form.Item label="price">
+                            <Input
+                                defaultValue={modalData.price}
+                                type="number"
+                                name="price"
+                                placeholder="price"
+                                onChange={handleChange} />
+                        </Form.Item>
+                        <Form.Item label="category">
+                            <Input
+                                value={modalData.category}
+                                type="text"
+                                name="category"
+                                placeholder="category"
+                                onChange={handleChange} />
+                        </Form.Item>
+                        <Form.Item label="description">
+                            <Input
+                                value={modalData.description}
+                                type="text"
+                                name="description"
+                                placeholder="description"
+                                onChange={handleChange} />
+                        </Form.Item>
+                    </Modal>
+                    <AddProduct />
+                    <Table columns={columns} dataSource={list} />
+                    {/* {Array.isArray(list) ? (
                 <Table columns={columns} dataSource={list} />
             ) : (
                 <Table columns={columns} dataSource={[list]} /> // Wrap the object in an array
+            )} */}
+                </div>
             )}
         </>
 

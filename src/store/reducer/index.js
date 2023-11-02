@@ -71,7 +71,7 @@ const authReducer = (state = initialState, action) => {
         case ADD_PRODUCT_SUCCESS:
             return {
                 ...state,
-                list: [...state.action, action.payload],
+                list: [...state.list, action.payload],
                 addProductError: false,
             };
         case ADD_PRODUCT_FAILURE:
@@ -88,7 +88,7 @@ const authReducer = (state = initialState, action) => {
         case UPDATE_PRODUCT_SUCCESS:
             return {
                 ...state,
-                list: state.action.map((item) => item.id === action.payload.id ? action.payload : item),
+                list: state.list.map((item) => item.id === action.payload.id ? action.payload : item),
                 editProductError: false,
             };
         case UPDATE_PRODUCT_FAILURE:

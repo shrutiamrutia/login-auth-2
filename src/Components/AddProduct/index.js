@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Button, Form, Input, Modal, Space } from 'antd';
+import { Button, Form, Input, Modal, Space, message } from 'antd';
 import { useDispatch } from "react-redux";
 import { addNewProduct } from "../../store/action";
 
@@ -9,7 +9,8 @@ const AddProduct = () => {
     const [price, setPrice] = useState('');
     const [category, setCategory] = useState('');
     const [description, setDescription] = useState('');
-
+    const [messageApi, contextHolder] = message.useMessage();
+    const [isLoading, setIsLoading] = useState(false);
 
     const dispatch = useDispatch();
 
@@ -34,22 +35,22 @@ const AddProduct = () => {
     };
 
     const handleOk = () => {
-        setIsModalOpen(false);
-        // body 
-        const body = {
-            "title": title,
-            "description": description,
-            "price": price,
-            "category": category,
-            // "images": [
-            //     "https://i.dummyjson.com/data/products/1/1.jpg",
-            //     "https://i.dummyjson.com/data/products/1/2.jpg",
-            //     "https://i.dummyjson.com/data/products/1/3.jpg",
-            //     "https://i.dummyjson.com/data/products/1/4.jpg",
-            //     "https://i.dummyjson.com/data/products/1/thumbnail.jpg"
-            // ]
-        }
-        dispatch(addNewProduct(body));
+        setIsLoading(true);
+        setTimeout(() => {
+            messageApi.open({
+                type: 'success',
+                content: 'Added Product Successfully',
+            });
+            setIsModalOpen(false);
+            setIsLoading(false);
+            const body = {
+                "title": title,
+                "description": description,
+                "price": price,
+                "category": category,
+            }
+            dispatch(addNewProduct(body));
+        }, 1000);
     };
 
     const handleCancel = () => {
@@ -58,7 +59,7 @@ const AddProduct = () => {
 
 
     return (
-        <>
+        <>{contextHolder}
             <Space wrap style={{
                 fontSize: '24px',
                 position: 'relative',
@@ -70,7 +71,7 @@ const AddProduct = () => {
                     Add Product
                 </Button>
             </Space>
-            <Modal title="Add Product" open={isModalOpen} onOk={handleOk} onCancel={handleCancel}>
+            <Modal title="Add Product" open={isModalOpen} onOk={handleOk} onCancel={handleCancel} okText="Add" confirmLoading={isLoading}>
 
                 <Form.Item label="Title">
                     <Input

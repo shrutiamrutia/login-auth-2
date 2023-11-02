@@ -16,6 +16,7 @@ import {
     DELETE_PRODUCT_SUCCESS,
     DELETE_PRODUCT_FAILURE
 } from '../actionType'
+import { message } from 'antd';
 
 
 export const loginRequest = payload => {
@@ -114,17 +115,19 @@ export const addProductFailure = payload => {
 }
 
 
-export const addNewProduct = (body) => async dispatch => {
-    dispatch(addProduct())
+export const addNewProduct = (body) => async (dispatch, getState) => {
+    dispatch(addProduct());
     axios
         .post("https://fakestoreapi.com/products", body)
         .then((response) => {
-            dispatch(addProductSuccess(response.data));
+            const currentList = getState().login.list; // Get the current list from the state
+            const updatedList = [...currentList, response.data]; // Add the new item to the list
+            dispatch(addProductSuccess(updatedList)); // Update the state with the updated list
         })
         .catch((error) => {
             dispatch(addProductFailure(error.data));
         });
-}
+};
 
 export const updateProduct = payload => {
     return {
@@ -148,17 +151,22 @@ export const updateProductFailure = payload => {
 }
 
 
-export const editProduct = (body, id) => async dispatch => {
-    dispatch(updateProduct())
+export const editProduct = (body, id) => async (dispatch, getState) => {
+    dispatch(updateProduct());
     axios
         .put(`https://fakestoreapi.com/products/${id}`, body)
         .then((response) => {
-            dispatch(updateProductSuccess(response.data));
+            const currentList = getState().login.list; // Get the current list from the state
+            const updatedList = currentList.map((item) =>
+                item.id === response.data.id ? response.data : item
+            );
+            dispatch(updateProductSuccess(updatedList)); // Update the state with the updated list
         })
         .catch((error) => {
             dispatch(updateProductFailure(error.data));
         });
-}
+};
+
 
 
 export const deleteProduct = payload => {
@@ -181,15 +189,16 @@ export const deleteProductFailure = payload => {
         payload: payload
     }
 }
+export const deleteProductData = (id) => async (dispatch, getState) => {
+    dispatch(deleteProduct());
+    try {
+        await axios.delete(`https://fakestoreapi.com/products/${id}`);
+        const currentList = getState().login.list; // Get the current list from the state
+        const updatedList = currentList.filter(item => item.id !== id); // Remove the deleted item from the list
+        dispatch(deleteProductSuccess(updatedList)); // Update the state with the updated list
+        message.success('Product deleted successfully');
+    } catch (error) {
+        dispatch(deleteProductFailure(error.data));
 
-export const deleteProductData = (id) => async dispatch => {
-    dispatch(deleteProduct())
-    axios
-        .delete(`https://fakestoreapi.com/products/${id}`)
-        .then((response) => {
-            dispatch(deleteProductSuccess(response.data));
-        })
-        .catch((error) => {
-            dispatch(deleteProductFailure(error.data));
-        });
-}
+    }
+};
